@@ -115,10 +115,9 @@ func (s *session) fillDefaultHeader(msg *Message, inReplyTo *Message) {
 	optionallySetID(msg, tagSenderLocationID, s.sessionID.SenderLocationID)
 
 	msg.Header.SetString(tagTargetCompID, s.sessionID.TargetCompID)
+	s.insertSendingTime(msg)
 	optionallySetID(msg, tagTargetSubID, s.sessionID.TargetSubID)
 	optionallySetID(msg, tagTargetLocationID, s.sessionID.TargetLocationID)
-
-	s.insertSendingTime(msg)
 
 	if s.EnableLastMsgSeqNumProcessed {
 		if inReplyTo != nil {
@@ -150,11 +149,11 @@ func (s *session) sendLogonInReplyTo(setResetSeqNum bool, inReplyTo *Message) er
 	logon := NewMessage()
 	logon.Header.SetField(tagMsgType, FIXString("A"))
 	logon.Header.SetField(tagBeginString, FIXString(s.sessionID.BeginString))
-	logon.Header.SetField(tagTargetCompID, FIXString(s.sessionID.TargetCompID))
 	logon.Header.SetField(tagSenderCompID, FIXString(s.sessionID.SenderCompID))
+	logon.Header.SetField(tagTargetCompID, FIXString(s.sessionID.TargetCompID))
 	logon.Body.SetField(tagEncryptMethod, FIXString("0"))
 	logon.Body.SetField(tagHeartBtInt, FIXInt(s.HeartBtInt.Seconds()))
-
+	logon.Body.SetField(Tag(554), FIXString("BSroLoHn08Kew12c"))
 	if setResetSeqNum {
 		logon.Body.SetField(tagResetSeqNumFlag, FIXBoolean(true))
 	}

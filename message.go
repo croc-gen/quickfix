@@ -12,6 +12,37 @@ import (
 //Header is first section of a FIX Message
 type Header struct{ FieldMap }
 
+func (h Header) write(buffer *bytes.Buffer) {
+
+	f, _ := h.TagLookup[tagBeginString]
+
+	writeField(f, buffer)
+
+	f, _ = h.TagLookup[tagBodyLength]
+
+	writeField(f, buffer)
+
+	f, _ = h.TagLookup[tagMsgType]
+
+	writeField(f, buffer)
+
+	f, _ = h.TagLookup[tagSenderCompID]
+
+	writeField(f, buffer)
+
+	f, _ = h.TagLookup[tagTargetCompID]
+
+	writeField(f, buffer)
+
+	f, _ = h.TagLookup[tagMsgSeqNum]
+
+	writeField(f, buffer)
+
+	f, _ = h.TagLookup[tagSendingTime]
+
+	writeField(f, buffer)
+}
+
 //in the message header, the first 3 tags in the message header must be 8,9,35
 func headerFieldOrdering(i, j Tag) bool {
 	var ordering = func(t Tag) uint32 {

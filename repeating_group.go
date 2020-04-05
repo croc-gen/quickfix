@@ -116,7 +116,7 @@ func (f RepeatingGroup) Write() []TagValue {
 		tags := group.sortedTags()
 
 		for _, tag := range tags {
-			if fields, ok := group.tagLookup[tag]; ok {
+			if fields, ok := group.TagLookup[tag]; ok {
 				tvs = append(tvs, fields...)
 			}
 		}
@@ -199,7 +199,7 @@ func (f *RepeatingGroup) Read(tv []TagValue) ([]TagValue, error) {
 			f.groups = append(f.groups, group)
 		}
 
-		group.tagLookup[tvRange[0].tag] = tvRange
+		group.TagLookup[tvRange[0].tag] = tvRange
 	}
 
 	if len(f.groups) != expectedGroupSize {

@@ -37,7 +37,7 @@ func (t tagSort) Less(i, j int) bool { return t.compare(t.tags[i], t.tags[j]) }
 
 //FieldMap is a collection of fix fields that make up a fix message.
 type FieldMap struct {
-	tagLookup map[Tag]field
+	TagLookup map[Tag]field
 	tagSort
 }
 
@@ -49,14 +49,14 @@ func (m *FieldMap) init() {
 }
 
 func (m *FieldMap) initWithOrdering(ordering tagOrder) {
-	m.tagLookup = make(map[Tag]field)
+	m.TagLookup = make(map[Tag]field)
 	m.compare = ordering
 }
 
 //Tags returns all of the Field Tags in this FieldMap
 func (m FieldMap) Tags() []Tag {
-	tags := make([]Tag, 0, len(m.tagLookup))
-	for t := range m.tagLookup {
+	tags := make([]Tag, 0, len(m.TagLookup))
+	for t := range m.TagLookup {
 		tags = append(tags, t)
 	}
 
@@ -70,13 +70,13 @@ func (m FieldMap) Get(parser Field) MessageRejectError {
 
 //Has returns true if the Tag is present in this FieldMap
 func (m FieldMap) Has(tag Tag) bool {
-	_, ok := m.tagLookup[tag]
+	_, ok := m.TagLookup[tag]
 	return ok
 }
 
 //GetField parses of a field with Tag tag. Returned reject may indicate the field is not present, or the field value is invalid.
 func (m FieldMap) GetField(tag Tag, parser FieldValueReader) MessageRejectError {
-	f, ok := m.tagLookup[tag]
+	f, ok := m.TagLookup[tag]
 	if !ok {
 		return ConditionallyRequiredFieldMissing(tag)
 	}
@@ -90,7 +90,7 @@ func (m FieldMap) GetField(tag Tag, parser FieldValueReader) MessageRejectError 
 
 //GetBytes is a zero-copy GetField wrapper for []bytes fields
 func (m FieldMap) GetBytes(tag Tag) ([]byte, MessageRejectError) {
-	f, ok := m.tagLookup[tag]
+	f, ok := m.TagLookup[tag]
 	if !ok {
 		return nil, ConditionallyRequiredFieldMissing(tag)
 	}
@@ -148,7 +148,7 @@ func (m FieldMap) GetString(tag Tag) (string, MessageRejectError) {
 
 //GetGroup is a Get function specific to Group Fields.
 func (m FieldMap) GetGroup(parser FieldGroupReader) MessageRejectError {
-	f, ok := m.tagLookup[parser.Tag()]
+	f, ok := m.TagLookup[parser.Tag()]
 	if !ok {
 		return ConditionallyRequiredFieldMissing(parser.Tag())
 	}
@@ -194,18 +194,18 @@ func (m *FieldMap) SetString(tag Tag, value string) *FieldMap {
 //Clear purges all fields from field map
 func (m *FieldMap) Clear() {
 	m.tags = m.tags[0:0]
-	for k := range m.tagLookup {
-		delete(m.tagLookup, k)
+	for k := range m.TagLookup {
+		delete(m.TagLookup, k)
 	}
 }
 
 //CopyInto overwrites the given FieldMap with this one
 func (m *FieldMap) CopyInto(to *FieldMap) {
-	to.tagLookup = make(map[Tag]field)
-	for tag, f := range m.tagLookup {
+	to.TagLookup = make(map[Tag]field)
+	for tag, f := range m.TagLookup {
 		clone := make(field, 1)
 		clone[0] = f[0]
-		to.tagLookup[tag] = clone
+		to.TagLookup[tag] = clone
 	}
 	to.tags = make([]Tag, len(m.tags))
 	copy(to.tags, m.tags)
@@ -214,21 +214,21 @@ func (m *FieldMap) CopyInto(to *FieldMap) {
 
 func (m *FieldMap) add(f field) {
 	t := fieldTag(f)
-	if _, ok := m.tagLookup[t]; !ok {
+	if _, ok := m.TagLookup[t]; !ok {
 		m.tags = append(m.tags, t)
 	}
 
-	m.tagLookup[t] = f
+	m.TagLookup[t] = f
 }
 
 func (m *FieldMap) getOrCreate(tag Tag) field {
-	if f, ok := m.tagLookup[tag]; ok {
+	if f, ok := m.TagLookup[tag]; ok {
 		f = f[:1]
 		return f
 	}
 
 	f := make(field, 1)
-	m.tagLookup[tag] = f
+	m.TagLookup[tag] = f
 	m.tags = append(m.tags, tag)
 	return f
 }
@@ -242,11 +242,11 @@ func (m *FieldMap) Set(field FieldWriter) *FieldMap {
 
 //SetGroup is a setter specific to group fields
 func (m *FieldMap) SetGroup(field FieldGroupWriter) *FieldMap {
-	_, ok := m.tagLookup[field.Tag()]
+	_, ok := m.TagLookup[field.Tag()]
 	if !ok {
 		m.tags = append(m.tags, field.Tag())
 	}
-	m.tagLookup[field.Tag()] = field.Write()
+	m.TagLookup[field.Tag()] = field.Write()
 	return m
 }
 
@@ -257,7 +257,7 @@ func (m *FieldMap) sortedTags() []Tag {
 
 func (m FieldMap) write(buffer *bytes.Buffer) {
 	for _, tag := range m.sortedTags() {
-		if f, ok := m.tagLookup[tag]; ok {
+		if f, ok := m.TagLookup[tag]; ok {
 			writeField(f, buffer)
 		}
 	}
@@ -265,7 +265,7 @@ func (m FieldMap) write(buffer *bytes.Buffer) {
 
 func (m FieldMap) total() int {
 	total := 0
-	for _, fields := range m.tagLookup {
+	for _, fields := range m.TagLookup {
 		for _, tv := range fields {
 			switch tv.tag {
 			case tagCheckSum: //tag does not contribute to total
@@ -280,7 +280,7 @@ func (m FieldMap) total() int {
 
 func (m FieldMap) length() int {
 	length := 0
-	for _, fields := range m.tagLookup {
+	for _, fields := range m.TagLookup {
 		for _, tv := range fields {
 			switch tv.tag {
 			case tagBeginString, tagBodyLength, tagCheckSum: //tags do not contribute to length
