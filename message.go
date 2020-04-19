@@ -386,7 +386,7 @@ func (m *Message) String() string {
 		return m.rawMessage.String()
 	}
 
-	return string(m.build())
+	return string(m.buildUnsorted())
 }
 
 func formatCheckSum(value int) string {
@@ -400,6 +400,16 @@ func (m *Message) build() []byte {
 	var b bytes.Buffer
 	m.Header.write(&b)
 	m.Body.write(&b)
+	m.Trailer.write(&b)
+	return b.Bytes()
+}
+
+func (m *Message) buildUnsorted() []byte {
+	m.cook()
+
+	var b bytes.Buffer
+	m.Header.write(&b)
+	m.Body.writeUnsorted(&b)
 	m.Trailer.write(&b)
 	return b.Bytes()
 }

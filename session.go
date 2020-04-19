@@ -153,7 +153,7 @@ func (s *session) sendLogonInReplyTo(setResetSeqNum bool, inReplyTo *Message) er
 	logon.Header.SetField(tagTargetCompID, FIXString(s.sessionID.TargetCompID))
 	logon.Body.SetField(tagEncryptMethod, FIXString("0"))
 	logon.Body.SetField(tagHeartBtInt, FIXInt(s.HeartBtInt.Seconds()))
-	logon.Body.SetField(Tag(554), FIXString("BSroLoHn08Kew12c"))
+	logon.Body.SetField(Tag(554), FIXString(s.sessionID.Password))
 	if setResetSeqNum {
 		logon.Body.SetField(tagResetSeqNumFlag, FIXBoolean(true))
 	}
@@ -313,7 +313,7 @@ func (s *session) prepMessageForSend(msg *Message, inReplyTo *Message) (msgBytes
 		}
 	}
 
-	msgBytes = msg.build()
+	msgBytes = msg.buildUnsorted()
 	err = s.persist(seqNum, msgBytes)
 
 	return

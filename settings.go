@@ -70,6 +70,10 @@ func sessionIDFromSessionSettings(globalSettings *SessionSettings, sessionSettin
 		if settings.HasSetting(config.SessionQualifier) {
 			sessionID.Qualifier, _ = settings.Setting(config.SessionQualifier)
 		}
+
+		if settings.HasSetting("Password") {
+			sessionID.Password, _ = settings.Setting("Password")
+		}
 	}
 
 	return sessionID
